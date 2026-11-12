@@ -16,7 +16,7 @@ License:    MIT
 URL:        https://scarpino.dev
 Source0:    %{name}-%{version}.tar.bz2
 Requires:   sailfishsilica-qt5 >= 0.10.9
-Requires:   sailfish-components-pickers-qt5 >= 0.1.7
+#Requires:   sailfish-components-pickers-qt5 >= 0.1.7
 Requires:   sailfishsecretsdaemon-secretsplugins-default
 BuildRequires:  pkgconfig(sailfishapp) >= 1.0.2
 BuildRequires:  pkgconfig(Qt5Core)
