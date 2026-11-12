@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+X-Nemo-Application-Type=silica-qt5
+Categories=Utility;
+Icon=harbour-periscope
+Exec=harbour-periscope
+Name=Periscope
+Comment=Upload pictures to Panoramax
+
+[X-HarbourBackup]
+BackupPathList=.config/dev.scarpino/harbour-periscope/
+
+[X-Sailjail]
+Permissions=Internet;Secrets;MediaIndexing;Pictures
+OrganizationName=dev.scarpino
+ApplicationName=harbour-periscope
