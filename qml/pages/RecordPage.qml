@@ -74,7 +74,7 @@ Page {
         var timestamp = currentPosition.timestamp;
         if (!timestamp || isNaN(timestamp.getTime()))
             return false;
-        var age = (page.clockTick - timestamp.getTime()) / 1000;
+        var age = (Math.max(page.clockTick, Date.now()) - timestamp.getTime()) / 1000;
         return age >= 0 && age <= 10;
     }
     readonly property real maxGpsAccuracy: 10
@@ -161,7 +161,7 @@ Page {
         if (recording) {
             if (!landscape)
                 statusText = qsTr("Hold the phone in landscape to record!");
-            else if (!gpsAccuracyReady)
+            else if (gpsReady && !gpsAccuracyReady)
                 statusText = qsTr("Waiting for GPS accuracy of %1 m or better…").arg(maxGpsAccuracy);
             else if (focusAttemptActive)
                 statusText = qsTr("Focusing…");
@@ -237,7 +237,7 @@ Page {
         if (sessionCount === 0)
             sessionSummary = qsTr("No photos recorded");
         else
-            sessionSummary = qsTr("%1 photos saved in %2").arg(sessionCount).arg(sessionPath);
+            sessionSummary = qsTr("%1 photos saved in %2").arg(sessionCount).arg(recorder.displayPath(sessionPath));
 
         updateStatus();
     }

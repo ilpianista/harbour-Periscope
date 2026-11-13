@@ -259,12 +259,14 @@
 <context>
     <name>PhotoMetadata</name>
     <message>
-        <location filename="../src/photometadata.cpp" line="104"/>
+        <location filename="../src/photometadata_builtin.cpp" line="244"/>
+        <location filename="../src/photometadata_libexif.cpp" line="104"/>
         <source>Cannot read the picture</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/photometadata.cpp" line="111"/>
+        <location filename="../src/photometadata_builtin.cpp" line="252"/>
+        <location filename="../src/photometadata_libexif.cpp" line="111"/>
         <source>Not a JPEG picture</source>
         <translation type="unfinished"></translation>
     </message>
@@ -533,168 +535,168 @@
 <context>
     <name>UploadPage</name>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="241"/>
+        <location filename="../qml/pages/UploadPage.qml" line="235"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="263"/>
+        <location filename="../qml/pages/UploadPage.qml" line="254"/>
         <source>Periscope</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="248"/>
+        <location filename="../qml/pages/UploadPage.qml" line="241"/>
         <source>Send picture</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="248"/>
+        <location filename="../qml/pages/UploadPage.qml" line="241"/>
         <source>Send pictures</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="281"/>
+        <location filename="../qml/pages/UploadPage.qml" line="272"/>
         <source>Choose pictures</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="288"/>
-        <location filename="../qml/pages/UploadPage.qml" line="553"/>
+        <location filename="../qml/pages/UploadPage.qml" line="279"/>
+        <location filename="../qml/pages/UploadPage.qml" line="529"/>
         <source>Choose folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="319"/>
+        <location filename="../qml/pages/UploadPage.qml" line="310"/>
         <source>%1 selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="322"/>
+        <location filename="../qml/pages/UploadPage.qml" line="312"/>
         <source>%1 without GPS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="325"/>
+        <location filename="../qml/pages/UploadPage.qml" line="314"/>
         <source>%1 without date</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="328"/>
+        <location filename="../qml/pages/UploadPage.qml" line="316"/>
         <source>%1 not usable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="342"/>
+        <location filename="../qml/pages/UploadPage.qml" line="328"/>
         <source>Pictures need both a GPS position and a capture date to be uploaded.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="357"/>
+        <location filename="../qml/pages/UploadPage.qml" line="343"/>
         <source>Upload</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="274"/>
+        <location filename="../qml/pages/UploadPage.qml" line="265"/>
         <source>Title (optional)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="372"/>
+        <location filename="../qml/pages/UploadPage.qml" line="358"/>
         <source>Tags (optional)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="383"/>
+        <location filename="../qml/pages/UploadPage.qml" line="369"/>
         <source>Comma-separated key=value tags, applied to the whole upload.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="388"/>
+        <location filename="../qml/pages/UploadPage.qml" line="374"/>
         <source>Keep all pictures in one sequence</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="389"/>
+        <location filename="../qml/pages/UploadPage.qml" line="375"/>
         <source>Useful for a walk, a ride or a drive covering many pictures</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="366"/>
+        <location filename="../qml/pages/UploadPage.qml" line="352"/>
         <source>Faces and number plates are blurred by the Panoramax instance before publication ONLY if it has a blurring service enabled. Check your instance&apos;s policy.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="216"/>
+        <location filename="../qml/pages/UploadPage.qml" line="211"/>
         <source>Sequence %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="404"/>
+        <location filename="../qml/pages/UploadPage.qml" line="390"/>
         <source>%1/%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="250"/>
+        <location filename="../qml/pages/UploadPage.qml" line="242"/>
         <source>Uploading…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="161"/>
+        <location filename="../qml/pages/UploadPage.qml" line="156"/>
         <source>No pictures found in this folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="305"/>
+        <location filename="../qml/pages/UploadPage.qml" line="296"/>
         <source>Reading pictures…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="420"/>
+        <location filename="../qml/pages/UploadPage.qml" line="404"/>
         <source>Result</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="431"/>
+        <location filename="../qml/pages/UploadPage.qml" line="415"/>
         <source>%1 uploaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="433"/>
+        <location filename="../qml/pages/UploadPage.qml" line="417"/>
         <source>%1 rejected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="435"/>
+        <location filename="../qml/pages/UploadPage.qml" line="419"/>
         <source>%1 failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="437"/>
+        <location filename="../qml/pages/UploadPage.qml" line="421"/>
         <source>Finished</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="449"/>
+        <location filename="../qml/pages/UploadPage.qml" line="433"/>
         <source>The instance is still processing some pictures. You can check the result on its website later.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="464"/>
+        <location filename="../qml/pages/UploadPage.qml" line="448"/>
         <source>Panoramax collection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="476"/>
+        <location filename="../qml/pages/UploadPage.qml" line="458"/>
         <source>1 picture published</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="477"/>
+        <location filename="../qml/pages/UploadPage.qml" line="458"/>
         <source>%1 pictures published</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/UploadPage.qml" line="524"/>
+        <location filename="../qml/pages/UploadPage.qml" line="500"/>
         <source>Retry failed pictures</source>
         <translation type="unfinished"></translation>
     </message>

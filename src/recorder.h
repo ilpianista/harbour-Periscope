@@ -31,6 +31,7 @@ public:
     Q_INVOKABLE void photoSaved(const QString &path);
     Q_INVOKABLE QVariantMap finishSession();
     Q_INVOKABLE QStringList pictureFiles(const QString &folder) const;
+    Q_INVOKABLE QString displayPath(const QString &path) const;
 
     void setIntervalSeconds(int seconds);
 

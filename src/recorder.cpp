@@ -125,6 +125,19 @@ QVariantMap Recorder::finishSession()
     return result;
 }
 
+QString Recorder::displayPath(const QString &path) const
+{
+    if (path.isEmpty()) {
+        return QString();
+    }
+
+    const QString relative = QDir::home().relativeFilePath(path);
+    if (relative.startsWith(QStringLiteral(".."))) {
+        return QFileInfo(path).fileName();
+    }
+    return relative;
+}
+
 QStringList Recorder::pictureFiles(const QString &folder) const
 {
     QStringList result;
