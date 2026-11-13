@@ -1,5 +1,13 @@
 Name:       harbour-periscope
 
+# Build a Harbour-compatible package without the libexif dependency with:
+#   rpmbuild --define 'harbour 1' ...
+%if 0%{?harbour}
+%define periscope_qmake_config CONFIG+=harbour
+%else
+%define periscope_libexif 1
+%endif
+
 # >> macros
 # << macros
 
@@ -20,7 +28,9 @@ Requires:   qt5-qtmultimedia
 Requires:   qt5-qtdeclarative-import-multimedia
 Requires:   qt5-qtdeclarative-import-sensors
 Requires:   qt5-qtdeclarative-import-positioning
+%if 0%{?periscope_libexif}
 Requires:   libexif
+%endif
 Requires:   libkeepalive
 BuildRequires:  pkgconfig(sailfishapp) >= 1.0.2
 BuildRequires:  pkgconfig(Qt5Core)
@@ -30,7 +40,9 @@ BuildRequires:  pkgconfig(Qt5Network)
 BuildRequires:  pkgconfig(Qt5Qml)
 BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  pkgconfig(sailfishsecrets)
+%if 0%{?periscope_libexif}
 BuildRequires:  pkgconfig(libexif)
+%endif
 BuildRequires:  desktop-file-utils
 
 %description
@@ -64,7 +76,7 @@ Links:
 # >> build pre
 # << build pre
 
-%qtc_qmake5 APP_VERSION=%{version}
+%qtc_qmake5 APP_VERSION=%{version} %{?periscope_qmake_config}
 
 %qtc_make %{?_smp_mflags}
 

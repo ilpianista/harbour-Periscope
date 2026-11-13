@@ -8,17 +8,27 @@ DEFINES += APP_VERSION=\\\"$$APP_VERSION\\\"
 
 QT += network multimedia
 
-PKGCONFIG += sailfishsecrets libexif
+PKGCONFIG += sailfishsecrets
 
 INCLUDEPATH += /usr/include/Sailfish
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172 256x256
 
+# By default use the system libexif. Build with CONFIG+=harbour
+# to use the self-contained EXIF parser instead, which does
+# not add any external runtime dependency (needed by Harbour).
+# https://github.com/sailfishos/sdk-harbour-rpmvalidator/pull/191
+CONFIG(harbour)|CONFIG(no_libexif) {
+    SOURCES += src/photometadata_builtin.cpp
+} else {
+    PKGCONFIG += libexif
+    SOURCES += src/photometadata_libexif.cpp
+}
+
 SOURCES += \
     src/cameracapabilities.cpp \
     src/main.cpp \
     src/panoramaxclient.cpp \
-    src/photometadata.cpp \
     src/recorder.cpp \
     src/securestorage.cpp
 

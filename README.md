@@ -6,6 +6,15 @@ A [Panoramax](https://panoramax.fr) client for [Sailfish OS](https://sailfishos.
 
 Install via Jolla Store or [Chum](https://github.com/sailfishos-chum/main).
 
+## Building
+
+The default build links against `libexif`. To build a Harbour-compatible
+binary without that runtime dependency, use the built-in EXIF parser:
+
+```sh
+qmake CONFIG+=harbour
+```
+
 ## Translations
 
 [![Translation status](https://hosted.weblate.org/widgets/harbour-periscope/-/svg-badge.svg)](https://hosted.weblate.org/engage/harbour-periscope/?utm_source=widget)
