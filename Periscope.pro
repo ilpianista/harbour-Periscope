@@ -8,7 +8,7 @@ DEFINES += APP_VERSION=\\\"$$APP_VERSION\\\"
 
 QT += network multimedia
 
-PKGCONFIG += sailfishsecrets
+PKGCONFIG += sailfishsecrets libexif
 
 INCLUDEPATH += /usr/include/Sailfish
 

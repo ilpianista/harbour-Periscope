@@ -259,12 +259,12 @@
 <context>
     <name>PhotoMetadata</name>
     <message>
-        <location filename="../src/photometadata.cpp" line="244"/>
+        <location filename="../src/photometadata.cpp" line="104"/>
         <source>Cannot read the picture</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/photometadata.cpp" line="252"/>
+        <location filename="../src/photometadata.cpp" line="111"/>
         <source>Not a JPEG picture</source>
         <translation type="unfinished"></translation>
     </message>

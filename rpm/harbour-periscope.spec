@@ -20,6 +20,7 @@ Requires:   qt5-qtmultimedia
 Requires:   qt5-qtdeclarative-import-multimedia
 Requires:   qt5-qtdeclarative-import-sensors
 Requires:   qt5-qtdeclarative-import-positioning
+Requires:   libexif
 Requires:   libkeepalive
 BuildRequires:  pkgconfig(sailfishapp) >= 1.0.2
 BuildRequires:  pkgconfig(Qt5Core)
@@ -29,6 +30,7 @@ BuildRequires:  pkgconfig(Qt5Network)
 BuildRequires:  pkgconfig(Qt5Qml)
 BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  pkgconfig(sailfishsecrets)
+BuildRequires:  pkgconfig(libexif)
 BuildRequires:  desktop-file-utils
 
 %description
