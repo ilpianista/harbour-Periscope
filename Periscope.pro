@@ -2,6 +2,10 @@ TARGET = harbour-periscope
 
 CONFIG += sailfishapp
 
+# The RPM spec passes the package version so it stays the single source of truth.
+isEmpty(APP_VERSION): APP_VERSION = 0.0.0
+DEFINES += APP_VERSION=\\\"$$APP_VERSION\\\"
+
 QT += network multimedia
 
 PKGCONFIG += sailfishsecrets

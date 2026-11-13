@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     QScopedPointer<QQuickView> view(SailfishApp::createView());
 
     QCoreApplication::setApplicationName(QStringLiteral("harbour-periscope"));
-    QCoreApplication::setApplicationVersion(QStringLiteral("0.2.0"));
+    QCoreApplication::setApplicationVersion(QStringLiteral(APP_VERSION));
     QCoreApplication::setOrganizationName(QStringLiteral("dev.scarpino"));
 
     qmlRegisterType<PanoramaxClient>("harbour.periscope", 1, 0, "PanoramaxClient");
