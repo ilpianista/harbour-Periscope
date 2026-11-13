@@ -24,6 +24,10 @@ jobs:
     steps:
     - uses: actions/checkout@v5
 
+    # Let's produce a Harbour-compatible RPM.
+    - name: Configure Harbour-compatible build
+      run: sed -i '1i %define harbour 1' rpm/harbour-periscope.spec
+
     - name: Build ${{ matrix.arch }}
       uses: coderus/github-sfos-build@sfos5
       with:
