@@ -487,20 +487,12 @@
         <translation>L&apos;istanza sta ancora elaborando alcune foto. Puoi controllare il risultato sul suo sito web più tardi.</translation>
     </message>
     <message>
-        <source>%1 uploaded</source>
-        <translation>%1 caricate</translation>
-    </message>
-    <message>
         <source>%1 rejected</source>
         <translation>%1 rifiutate</translation>
     </message>
     <message>
         <source>%1 failed</source>
         <translation>%1 non riuscite</translation>
-    </message>
-    <message>
-        <source>Finished</source>
-        <translation>Completato</translation>
     </message>
     <message>
         <source>Panoramax collection</source>

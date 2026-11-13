@@ -400,20 +400,17 @@ Page {
                     }
 
                     Label {
+                        visible: text.length > 0
                         x: Theme.horizontalPageMargin
                         width: parent.width - 2 * Theme.horizontalPageMargin
                         wrapMode: Text.Wrap
                         text: {
                             var s = page.summary;
                             var parts = [];
-                            if (s.prepared > 0)
-                                parts.push(qsTr("%1 uploaded").arg(s.prepared));
                             if (s.rejected > 0)
                                 parts.push(qsTr("%1 rejected").arg(s.rejected));
                             if (s.failed > 0)
                                 parts.push(qsTr("%1 failed").arg(s.failed));
-                            if (parts.length === 0)
-                                parts.push(qsTr("Finished"));
                             return parts.join(" · ");
                         }
                     }
