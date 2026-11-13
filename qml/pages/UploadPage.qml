@@ -17,6 +17,11 @@ Page {
     property var summary: ({})
     property string errorText
     property bool authPrompted: false
+    property bool wasSignedIn: false
+    property bool scanning: false
+    property var pendingPhotos: []
+    property var stagedPhotos: []
+    property var knownPaths: ({})
 
     readonly property bool accountReady: !client.authEnabled || (client.signedIn && (!client.tosRequired || client.tosAccepted))
 
@@ -29,9 +34,30 @@ Page {
         pageStack.replace(Qt.resolvedUrl("AuthPage.qml"));
     }
 
-    Component.onCompleted: maybeOpenAuth()
-    onStatusChanged: if (status === PageStatus.Active)
-        maybeOpenAuth()
+    function attachRecordPage() {
+        if (page.status !== PageStatus.Active || pageStack.currentPage !== page)
+            return;
+        if (authPrompted || !page.accountReady)
+            return;
+        if (pageStack.nextPage(page) !== null)
+            return;
+        pageStack.pushAttached(Qt.resolvedUrl("RecordPage.qml"));
+    }
+
+    Component.onCompleted: {
+        wasSignedIn = client.signedIn;
+        maybeOpenAuth();
+    }
+    onStatusChanged: {
+        if (status === PageStatus.Active) {
+            maybeOpenAuth();
+            attachRecordPage();
+        }
+    }
+
+    function isUploadable(photo) {
+        return photo.valid && photo.jpeg && photo.hasGps && photo.hasDate;
+    }
 
     function updateCounts() {
         var uploadable = 0;
@@ -48,7 +74,7 @@ Page {
                 noGps++;
             if (!p.hasDate)
                 noDate++;
-            if (p.hasGps && p.hasDate)
+            if (isUploadable(p))
                 uploadable++;
         }
         uploadCount = uploadable;
@@ -57,36 +83,90 @@ Page {
         invalidCount = invalid;
     }
 
+    function enqueuePhotos(entries) {
+        if (!entries || entries.length === 0)
+            return;
+        if (!scanning) {
+            scanning = true;
+            stagedPhotos = photos.slice();
+            knownPaths = ({});
+            for (var i = 0; i < stagedPhotos.length; ++i)
+                knownPaths[stagedPhotos[i].filePath] = true;
+        }
+
+        for (var j = 0; j < entries.length; ++j) {
+            var path = entries[j].path;
+            if (knownPaths[path])
+                continue;
+            knownPaths[path] = true;
+            pendingPhotos.push(entries[j]);
+        }
+
+        if (!scanTimer.running)
+            scanTimer.start();
+    }
+
+    function finishScan() {
+        scanTimer.stop();
+        photos = stagedPhotos;
+        stagedPhotos = [];
+        knownPaths = ({});
+        scanning = false;
+        updateCounts();
+    }
+
+    function scanNextPhoto() {
+        if (pendingPhotos.length === 0) {
+            finishScan();
+            return;
+        }
+
+        var entry = pendingPhotos.shift();
+        var meta = metadata.read(entry.path);
+        stagedPhotos.push({
+            "filePath": meta.filePath,
+            "fileName": meta.fileName,
+            "valid": meta.valid,
+            "jpeg": meta.jpeg,
+            "hasGps": meta.hasGps,
+            "latitude": meta.latitude,
+            "longitude": meta.longitude,
+            "hasDate": meta.capturedAt ? true : false,
+            "capturedAt": meta.capturedAt ? meta.capturedAt : "",
+            "error": meta.error ? meta.error : "",
+            "url": entry.url ? entry.url : ""
+        });
+    }
+
     function addSelected(model) {
-        var list = photos.slice();
+        var entries = [];
         for (var i = 0; i < model.count; ++i) {
             var item = model.get(i);
-            var exists = false;
-            for (var j = 0; j < list.length; ++j) {
-                if (list[j].filePath === item.filePath) {
-                    exists = true;
-                    break;
-                }
-            }
-            if (exists)
-                continue;
-            var meta = metadata.read(item.filePath);
-            list.push({
-                "filePath": meta.filePath,
-                "fileName": meta.fileName,
-                "valid": meta.valid,
-                "jpeg": meta.jpeg,
-                "hasGps": meta.hasGps,
-                "latitude": meta.latitude,
-                "longitude": meta.longitude,
-                "hasDate": meta.capturedAt ? true : false,
-                "capturedAt": meta.capturedAt ? meta.capturedAt : "",
-                "error": meta.error ? meta.error : "",
-                "url": item.url
+            entries.push({
+                "path": item.filePath,
+                "url": item.url ? item.url : ""
             });
         }
-        photos = list;
-        updateCounts();
+        enqueuePhotos(entries);
+    }
+
+    function addFolder(folder) {
+        var paths = folder ? recorder.pictureFiles(folder) : [];
+        if (paths.length === 0) {
+            errorText = qsTr("No pictures found in this folder");
+            return;
+        }
+
+        errorText = "";
+        // A folder is a single capture session: keep its pictures in one sequence.
+        sequenceSwitch.checked = true;
+        var entries = [];
+        for (var i = 0; i < paths.length; ++i)
+            entries.push({
+                "path": paths[i],
+                "url": ""
+            });
+        enqueuePhotos(entries);
     }
 
     function openPicker() {
@@ -95,6 +175,10 @@ Page {
         if (picker._selectedModel)
             picker._selectedModel.clear();
         picker.open();
+    }
+
+    function openFolderPicker() {
+        pageStack.push(folderPicker);
     }
 
     function removeAt(index) {
@@ -107,9 +191,8 @@ Page {
     function uploadPaths() {
         var result = [];
         for (var i = 0; i < photos.length; ++i) {
-            var p = photos[i];
-            if (p.valid && p.jpeg && p.hasGps && p.hasDate)
-                result.push(p.filePath);
+            if (isUploadable(photos[i]))
+                result.push(photos[i].filePath);
         }
         return result;
     }
@@ -129,6 +212,11 @@ Page {
     }
 
     function clearForm() {
+        scanTimer.stop();
+        pendingPhotos = [];
+        stagedPhotos = [];
+        knownPaths = ({});
+        scanning = false;
         photos = [];
         singleSequence = false;
         sequenceSwitch.checked = false;
@@ -149,7 +237,7 @@ Page {
             }
 
             MenuItem {
-                enabled: page.accountReady && page.uploadCount > 0 && !client.busy && !page.finished
+                enabled: page.accountReady && page.uploadCount > 0 && !client.busy && !page.finished && !page.scanning
                 text: page.uploadCount === 1 ? qsTr("Send picture") : qsTr("Send pictures")
                 onClicked: Remorse.popupAction(page, qsTr("Uploading…"), function () {
                     page.startUpload();
@@ -184,6 +272,31 @@ Page {
                     text: qsTr("Choose pictures")
                     enabled: !client.busy
                     onClicked: page.openPicker()
+                }
+
+                Button {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: qsTr("Choose folder")
+                    enabled: !client.busy
+                    onClicked: page.openFolderPicker()
+                }
+
+                Row {
+                    visible: page.scanning
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: Theme.paddingMedium
+
+                    BusyIndicator {
+                        size: BusyIndicatorSize.Small
+                        running: page.scanning
+                    }
+
+                    Label {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("Reading pictures…")
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: Theme.secondaryColor
+                    }
                 }
 
                 Label {
@@ -278,13 +391,8 @@ Page {
                     }
                 }
 
-                Label {
-                    visible: page.errorText.length > 0
-                    x: Theme.horizontalPageMargin
-                    width: parent.width - 2 * Theme.horizontalPageMargin
-                    wrapMode: Text.Wrap
-                    color: Theme.errorColor
-                    text: page.errorText
+                ErrorLabel {
+                    message: page.errorText
                 }
 
                 Column {
@@ -406,6 +514,33 @@ Page {
         onAccepted: page.addSelected(picker.selectedContent)
     }
 
+    Timer {
+        id: scanTimer
+        interval: 1
+        repeat: true
+        onTriggered: page.scanNextPhoto()
+    }
+
+    Component {
+        id: folderPicker
+
+        FolderPickerDialog {
+            id: folderDialog
+            title: qsTr("Choose folder")
+            path: StandardPaths.pictures
+
+            // Qt's time sort already puts the most recent entry first in
+            // ascending order; reversing it would list the oldest first.
+            sortBy: 1
+            sortOrder: Qt.AscendingOrder
+
+            Connections {
+                target: folderDialog
+                onAccepted: page.addFolder(folderDialog.selectedPath)
+            }
+        }
+    }
+
     Connections {
         target: client
 
@@ -414,7 +549,13 @@ Page {
                 page.errorText = error;
         }
 
-        onAuthChanged: page.maybeOpenAuth()
+        onAuthChanged: {
+            if (page.wasSignedIn && !client.signedIn)
+                page.authPrompted = false;
+            page.wasSignedIn = client.signedIn;
+            page.maybeOpenAuth();
+            page.attachRecordPage();
+        }
 
         onUploadStarted: {
             page.finished = false;

@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.5
 import Sailfish.Silica 1.0
 
 Item {
@@ -17,6 +17,7 @@ Item {
         width: Theme.iconSizeMedium
         height: width
         asynchronous: true
+        autoTransform: true
         fillMode: Image.PreserveAspectCrop
         source: row.photo ? (row.photo.url ? row.photo.url : "file://" + row.photo.filePath) : ""
         sourceSize.width: width

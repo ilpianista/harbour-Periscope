@@ -4,6 +4,8 @@ import Sailfish.Silica 1.0
 CoverBackground {
     id: cover
 
+    readonly property bool accountReady: !client.authEnabled || (client.signedIn && (!client.tosRequired || client.tosAccepted))
+
     Column {
         anchors.centerIn: parent
         width: parent.width
@@ -43,15 +45,18 @@ CoverBackground {
     }
 
     CoverActionList {
-        enabled: client.signedIn
+        enabled: cover.accountReady
 
         CoverAction {
             iconSource: "image://theme/icon-cover-new"
 
-            onTriggered: {
-                app.activate();
-                pageStack.pop(null);
-            }
+            onTriggered: app.showUploads()
+        }
+
+        CoverAction {
+            iconSource: "image://theme/icon-cover-record"
+
+            onTriggered: app.openRecorder()
         }
     }
 }

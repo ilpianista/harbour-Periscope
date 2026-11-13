@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
+import "../components"
 
 Page {
     id: page
@@ -75,13 +76,8 @@ Page {
                 onClicked: page.connectToInstance()
             }
 
-            Label {
-                visible: page.errorText.length > 0
-                x: Theme.horizontalPageMargin
-                width: parent.width - 2 * Theme.horizontalPageMargin
-                wrapMode: Text.Wrap
-                color: Theme.errorColor
-                text: page.errorText
+            ErrorLabel {
+                message: page.errorText
             }
 
             Column {
@@ -115,14 +111,25 @@ Page {
                     text: qsTr("Accept the terms of service")
                     onClicked: client.acceptTos()
                 }
+            }
 
-                Label {
-                    visible: page.errorText.length > 0
-                    x: Theme.horizontalPageMargin
-                    width: parent.width - 2 * Theme.horizontalPageMargin
-                    wrapMode: Text.Wrap
-                    color: Theme.errorColor
-                    text: page.errorText
+            SectionHeader {
+                text: qsTr("Recording")
+            }
+
+            Slider {
+                id: intervalSlider
+                width: parent.width
+                label: qsTr("Snapshot interval")
+                valueText: qsTr("%1 s").arg(Math.round(value))
+                minimumValue: 1
+                maximumValue: 60
+                stepSize: 1
+                value: recorder.intervalSeconds
+                onValueChanged: {
+                    var seconds = Math.round(value);
+                    if (seconds !== recorder.intervalSeconds)
+                        recorder.intervalSeconds = seconds;
                 }
             }
         }

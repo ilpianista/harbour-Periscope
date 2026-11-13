@@ -78,9 +78,6 @@ signals:
     void tokenGenerated(const QString &claimUrl, const QString &error);
     void tosAcceptedResult(bool ok, const QString &error);
     void uploadStarted();
-    void uploadProgress(int percent, int done, int total, const QString &fileName);
-    void fileUploaded(int index, const QString &fileName, bool ok, const QString &message);
-    void processingUpdated(const QVariantMap &status);
     void uploadCompleted(const QVariantMap &summary);
     void uploadFailed(const QString &message);
     void errorReported(const QString &message);
@@ -88,12 +85,13 @@ signals:
 private:
     QUrl apiUrl(const QString &path) const;
     QNetworkRequest apiRequest(const QString &path, bool withAuth = true) const;
+    QNetworkRequest apiRequestFor(const QUrl &url, bool withAuth) const;
     void setTimeout(QNetworkReply *reply, int milliseconds);
     QString replyErrorMessage(QNetworkReply *reply, const QByteArray &body) const;
-    QString defaultTitle() const;
     void setBusy(bool busy);
     void setStatus(const QString &status);
-    void clearSession(bool emitSignals);
+    void updateProgress(int done);
+    void clearSession();
     void saveInstanceSettings();
     void setAuthResolved(bool resolved);
     void doAuthCheck(bool silent);
@@ -139,6 +137,7 @@ private:
     QStringList m_failedNames;
     QVariantMap m_lastProcessing;
     int m_pollElapsed;
+    int m_uploadAttempt;
     bool m_polling;
 };
 

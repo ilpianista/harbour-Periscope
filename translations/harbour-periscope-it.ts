@@ -63,6 +63,10 @@
         <source>Nothing happened? Make sure the browser opened the sign-in page of %1.</source>
         <translation>Non è successo nulla? Assicurati che il browser abbia aperto la pagina di accesso di %1.</translation>
     </message>
+    <message>
+        <source>Sign-in timed out. Please try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>PanoramaxClient</name>
@@ -131,10 +135,6 @@
         <translation>Creazione del set di caricamento…</translation>
     </message>
     <message>
-        <source>Sequence %1</source>
-        <translation>Sequenza %1</translation>
-    </message>
-    <message>
         <source>Retrying 1 picture…</source>
         <translation>Nuovo tentativo per 1 foto…</translation>
     </message>
@@ -149,14 +149,6 @@
     <message>
         <source>Uploading %1 of %2…</source>
         <translation>Caricamento di %1 su %2…</translation>
-    </message>
-    <message>
-        <source>Cannot read the picture</source>
-        <translation>Impossibile leggere la foto</translation>
-    </message>
-    <message>
-        <source>Already uploaded</source>
-        <translation>Già caricata</translation>
     </message>
     <message>
         <source>Finishing upload…</source>
@@ -200,10 +192,14 @@
     </message>
     <message>
         <source>Token expired or action not allowed</source>
-        <translation type="unfinished"></translation>
+        <translation>Token scaduto o azione non consentita</translation>
     </message>
     <message>
         <source>Upload sent, processing continues on the instance</source>
+        <translation>Caricamento inviato, l&apos;elaborazione continua sull&apos;istanza</translation>
+    </message>
+    <message>
+        <source>Retrying %1…</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -238,22 +234,104 @@
     </message>
     <message>
         <source>No date</source>
+        <translation>Nessuna data</translation>
+    </message>
+</context>
+<context>
+    <name>RecordPage</name>
+    <message>
+        <source>Preparing camera…</source>
+        <translation>Preparazione fotocamera…</translation>
+    </message>
+    <message>
+        <source>%1×%2</source>
+        <translation>%1×%2</translation>
+    </message>
+    <message>
+        <source>GPS: waiting for position</source>
+        <translation>GPS: in attesa della posizione</translation>
+    </message>
+    <message>
+        <source>GPS: %1, %2 (±%3 m)</source>
+        <translation>GPS: %1, %2 (±%3 m)</translation>
+    </message>
+    <message>
+        <source>GPS: %1, %2</source>
+        <translation>GPS: %1, %2</translation>
+    </message>
+    <message>
+        <source>Camera unavailable</source>
+        <translation>Fotocamera non disponibile</translation>
+    </message>
+    <message>
+        <source>Hold the phone in landscape to record!</source>
+        <translation>Tieni il telefono in orizzontale per registrare!</translation>
+    </message>
+    <message>
+        <source>Focusing…</source>
+        <translation>Messa a fuoco…</translation>
+    </message>
+    <message>
+        <source>Saving photo…</source>
+        <translation>Salvataggio foto…</translation>
+    </message>
+    <message>
+        <source>No photos recorded</source>
+        <translation>Nessuna foto registrata</translation>
+    </message>
+    <message>
+        <source>%1 photos saved in %2</source>
+        <translation>%1 foto salvate in %2</translation>
+    </message>
+    <message>
+        <source>The saved picture is missing GPS or date metadata</source>
+        <translation>La foto salvata non contiene i metadati GPS o la data</translation>
+    </message>
+    <message>
+        <source>%1 photos</source>
+        <translation>%1 foto</translation>
+    </message>
+    <message>
+        <source>Stop recording</source>
+        <translation>Interrompi registrazione</translation>
+    </message>
+    <message>
+        <source>Start recording</source>
+        <translation>Avvia registrazione</translation>
+    </message>
+    <message>
+        <source>Waiting for GPS accuracy of %1 m or better…</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Recorder</name>
+    <message>
+        <source>Cannot create %1</source>
+        <translation>Impossibile creare %1</translation>
+    </message>
+    <message>
+        <source>No recording in progress</source>
+        <translation>Nessuna registrazione in corso</translation>
+    </message>
+    <message>
+        <source>The picture was not saved</source>
+        <translation>La foto non è stata salvata</translation>
     </message>
 </context>
 <context>
     <name>SecureStorage</name>
     <message>
         <source>Could not open the secure storage: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Impossibile aprire l&apos;archivio sicuro: %1</translation>
     </message>
     <message>
         <source>Could not save the token: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Impossibile salvare il token: %1</translation>
     </message>
     <message>
         <source>Could not remove the stored token: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Impossibile rimuovere il token salvato: %1</translation>
     </message>
 </context>
 <context>
@@ -269,6 +347,14 @@
     <message>
         <source>Instance URL</source>
         <translation>URL dell&apos;istanza</translation>
+    </message>
+    <message>
+        <source>Recording</source>
+        <translation>Registrazione</translation>
+    </message>
+    <message>
+        <source>%1 s</source>
+        <translation>%1 s</translation>
     </message>
     <message>
         <source>Connecting…</source>
@@ -301,6 +387,10 @@
     <message>
         <source>Sign out</source>
         <translation>Esci</translation>
+    </message>
+    <message>
+        <source>Snapshot interval</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -343,6 +433,10 @@
     <message>
         <source>Choose pictures</source>
         <translation>Scegli le foto</translation>
+    </message>
+    <message>
+        <source>Choose folder</source>
+        <translation>Scegli la cartella</translation>
     </message>
     <message>
         <source>%1 selected</source>
@@ -426,35 +520,43 @@
     </message>
     <message>
         <source>Periscope</source>
-        <translation type="unfinished">Periscope</translation>
+        <translation>Periscope</translation>
     </message>
     <message>
         <source>%1/%2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1/%2</translation>
     </message>
     <message>
         <source>%1 without date</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 senza data</translation>
     </message>
     <message>
         <source>Pictures need both a GPS position and a capture date to be uploaded.</source>
-        <translation type="unfinished"></translation>
+        <translation>Le foto devono avere sia una posizione GPS sia una data di scatto per essere caricate.</translation>
     </message>
     <message>
         <source>Faces and number plates are blurred by the Panoramax instance before publication ONLY if it has a blurring service enabled. Check your instance&apos;s policy.</source>
-        <translation type="unfinished"></translation>
+        <translation>I volti e le targhe vengono sfocati dall&apos;istanza Panoramax prima della pubblicazione SOLO se dispone di un servizio di sfocatura. Controlla la politica della tua istanza.</translation>
     </message>
     <message>
         <source>Send picture</source>
-        <translation type="unfinished"></translation>
+        <translation>Invia foto</translation>
     </message>
     <message>
         <source>Send pictures</source>
-        <translation type="unfinished"></translation>
+        <translation>Invia foto</translation>
     </message>
     <message>
         <source>Sequence %1</source>
         <translation>Sequenza %1</translation>
+    </message>
+    <message>
+        <source>Reading pictures…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No pictures found in this folder</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

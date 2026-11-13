@@ -1,2 +1,6 @@
+* Fri Nov 13 2026 Andrea Scarpino <andrea@scarpino.dev> 0.2.0-1
+- Add sequential picture recording with GPS and compass metadata
+- Add folder picking and a cover action for the recording page
+
 * Thu Nov 12 2026 Andrea Scarpino <andrea@scarpino.dev> 0.1.0-1
 - Initial release.

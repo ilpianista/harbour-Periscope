@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
+import "../components"
 
 Page {
     id: page
@@ -52,13 +53,8 @@ Page {
                 EnterKey.onClicked: page.connectToInstance()
             }
 
-            Label {
-                visible: page.errorText.length > 0
-                x: Theme.horizontalPageMargin
-                width: parent.width - 2 * Theme.horizontalPageMargin
-                wrapMode: Text.Wrap
-                color: Theme.errorColor
-                text: page.errorText
+            ErrorLabel {
+                message: page.errorText
             }
 
             Button {

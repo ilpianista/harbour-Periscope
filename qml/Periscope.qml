@@ -8,6 +8,7 @@ ApplicationWindow {
 
     property PanoramaxClient client: PanoramaxClient {}
     property PhotoMetadata metadata: PhotoMetadata {}
+    property Recorder recorder: Recorder {}
 
     Component {
         id: setupPage
@@ -24,4 +25,32 @@ ApplicationWindow {
     initialPage: client.configured ? uploadPage : setupPage
     cover: Qt.resolvedUrl("cover/CoverPage.qml")
     allowedOrientations: defaultAllowedOrientations
+
+    function showUploads() {
+        activate();
+
+        if (pageStack.currentPage && pageStack.currentPage.recorderPage) {
+            pageStack.navigateBack(PageStackAction.Immediate);
+            return;
+        }
+
+        pageStack.pop(null);
+    }
+
+    function openRecorder() {
+        activate();
+
+        var current = pageStack.currentPage;
+        if (current && current.recorderPage)
+            return;
+
+        pageStack.pop(null);
+        current = pageStack.currentPage;
+        if (!current || !current.attachRecordPage)
+            return;
+
+        current.attachRecordPage();
+        if (pageStack.nextPage(current) !== null)
+            pageStack.navigateForward(PageStackAction.Immediate);
+    }
 }

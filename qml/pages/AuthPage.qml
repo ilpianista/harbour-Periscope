@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import Sailfish.Silica 1.0
+import "../components"
 
 Page {
     id: page
@@ -9,6 +10,7 @@ Page {
     property string errorText
     property bool waiting
     property bool closing
+    property int pollAttempts
 
     readonly property bool needsTos: client.signedIn && client.tosRequired && !client.tosAccepted
 
@@ -30,6 +32,7 @@ Page {
     function signInWithBrowser() {
         errorText = "";
         claimUrl = "";
+        pollAttempts = 0;
         waiting = true;
         client.generateToken();
     }
@@ -152,13 +155,8 @@ Page {
                 }
             }
 
-            Label {
-                visible: page.errorText.length > 0
-                x: Theme.horizontalPageMargin
-                width: parent.width - 2 * Theme.horizontalPageMargin
-                wrapMode: Text.Wrap
-                color: Theme.errorColor
-                text: page.errorText
+            ErrorLabel {
+                message: page.errorText
             }
 
             Label {
@@ -178,7 +176,14 @@ Page {
         interval: 3000
         repeat: true
         running: page.waiting && !client.signedIn && page.status === PageStatus.Active
-        onTriggered: client.pollAuth()
+        onTriggered: {
+            if (++page.pollAttempts > 100) {
+                page.waiting = false;
+                page.errorText = qsTr("Sign-in timed out. Please try again.");
+                return;
+            }
+            client.pollAuth();
+        }
     }
 
     Connections {

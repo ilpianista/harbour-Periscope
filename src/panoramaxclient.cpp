@@ -1,9 +1,8 @@
 #include "panoramaxclient.h"
+#include "appsettings.h"
 #include "securestorage.h"
 
 #include <QCoreApplication>
-#include <QDateTime>
-#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QHttpMultiPart>
@@ -11,14 +10,14 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonParseError>
-#include <QLocale>
 #include <QNetworkReply>
 #include <QNetworkRequest>
-#include <QStandardPaths>
 #include <QTimer>
 #include <QUrl>
 
 namespace {
+
+constexpr int kMaxUploadAttempts = 3;
 
 QString normalizeInstanceUrl(const QString &input)
 {
@@ -139,12 +138,10 @@ PanoramaxClient::PanoramaxClient(QObject *parent)
     , m_filesTotal(0)
     , m_queueIndex(0)
     , m_pollElapsed(0)
+    , m_uploadAttempt(0)
     , m_polling(false)
 {
-    const QString settingsPath = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)
-                                 + QDir::separator() + QCoreApplication::applicationName()
-                                 + QStringLiteral(".conf");
-    m_settings = new QSettings(settingsPath, QSettings::NativeFormat, this);
+    m_settings = new QSettings(appSettingsPath(), QSettings::NativeFormat, this);
 
     m_instanceUrl = m_settings->value(QStringLiteral("instanceUrl")).toString();
     m_instanceLabel = m_settings->value(QStringLiteral("instanceLabel")).toString();
@@ -206,11 +203,8 @@ void PanoramaxClient::checkInstance(const QString &url)
     setBusy(true);
     setStatus(tr("Contacting the instance…"));
 
-    QNetworkRequest request(QUrl(normalized + QStringLiteral("/api/configuration")));
-    request.setHeader(QNetworkRequest::UserAgentHeader,
-                      QStringLiteral("harbour-periscope/%1 (SailfishOS)")
-                          .arg(QCoreApplication::applicationVersion()));
-    request.setRawHeader("Accept", "application/json");
+    QNetworkRequest request = apiRequestFor(QUrl(normalized + QStringLiteral("/api/configuration")),
+                                            false);
 
     QNetworkReply *reply = m_manager->get(request);
     setTimeout(reply, 30000);
@@ -261,7 +255,7 @@ void PanoramaxClient::checkInstance(const QString &url)
         m_tosRequired = tosRequired;
 
         if (!previous.isEmpty() && previous != normalized) {
-            clearSession(true);
+            clearSession();
         }
 
         setBusy(false);
@@ -503,7 +497,7 @@ void PanoramaxClient::saveToken(const QString &token)
 void PanoramaxClient::signOut()
 {
     cancelUpload();
-    clearSession(true);
+    clearSession();
     setStatus(QString());
 }
 
@@ -573,6 +567,9 @@ void PanoramaxClient::startUpload(const QStringList &paths,
     m_failedNames.clear();
     m_lastProcessing.clear();
     m_pollElapsed = 0;
+    m_uploadAttempt = 0;
+    m_polling = false;
+    m_pollTimer->stop();
 
     emit progressChanged();
     emit uploadStateChanged();
@@ -580,7 +577,7 @@ void PanoramaxClient::startUpload(const QStringList &paths,
 
     setBusy(true);
     setStatus(tr("Creating upload set…"));
-    createUploadSet(title.isEmpty() ? defaultTitle() : title, tags, singleSequence);
+    createUploadSet(title.isEmpty() ? QString() : title, tags, singleSequence);
 }
 
 void PanoramaxClient::retryUpload()
@@ -598,6 +595,7 @@ void PanoramaxClient::retryUpload()
     m_filesDone = 0;
     m_filesTotal = m_queuePaths.size();
     m_progress = 0;
+    m_uploadAttempt = 0;
 
     emit progressChanged();
     emit uploadStateChanged();
@@ -690,10 +688,7 @@ void PanoramaxClient::uploadNext()
         m_failedPaths.append(path);
         m_failedNames.append(name);
 
-        m_progress = qMin(100, int(100.0 * double(m_filesDone) / double(qMax(1, m_filesTotal))));
-        emit progressChanged();
-        emit uploadProgress(m_progress, m_filesDone, m_filesTotal, name);
-        emit fileUploaded(index, name, false, tr("Cannot read the picture"));
+        updateProgress(m_filesDone);
         emit uploadStateChanged();
         QTimer::singleShot(0, this, [this]() { uploadNext(); });
         return;
@@ -733,10 +728,9 @@ void PanoramaxClient::uploadNext()
                     m_progress = percent;
                     emit progressChanged();
                 }
-                emit uploadProgress(percent, m_filesDone, m_filesTotal, m_queueNames.value(index));
             });
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, path, name, index]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, path, name]() {
         reply->deleteLater();
         if (m_activeUpload == reply) {
             m_activeUpload = nullptr;
@@ -745,26 +739,31 @@ void PanoramaxClient::uploadNext()
             return;
         }
 
-        const QByteArray body = readReplyBody(reply);
         const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         const bool alreadyUploaded = httpStatus == 409;
         const bool ok = reply->error() == QNetworkReply::NoError || alreadyUploaded;
 
-        QString message;
+        const bool transient = !ok && !alreadyUploaded
+                               && (httpStatus == 0 || httpStatus >= 500
+                                   || reply->error() == QNetworkReply::TimeoutError
+                                   || reply->error() == QNetworkReply::TemporaryNetworkFailureError
+                                   || reply->error() == QNetworkReply::NetworkSessionFailedError);
+        if (transient && m_uploadAttempt < kMaxUploadAttempts - 1) {
+            ++m_uploadAttempt;
+            setStatus(tr("Retrying %1…").arg(name));
+            QTimer::singleShot(1000 * m_uploadAttempt, this, [this]() { uploadNext(); });
+            return;
+        }
+
+        m_uploadAttempt = 0;
         if (!ok) {
-            message = replyErrorMessage(reply, body);
             m_failedPaths.append(path);
             m_failedNames.append(name);
-        } else if (alreadyUploaded) {
-            message = tr("Already uploaded");
         }
 
         ++m_queueIndex;
         ++m_filesDone;
-        m_progress = qMin(100, int(100.0 * double(m_filesDone) / double(qMax(1, m_filesTotal))));
-        emit progressChanged();
-        emit uploadProgress(m_progress, m_filesDone, m_filesTotal, name);
-        emit fileUploaded(index, name, ok, message);
+        updateProgress(m_filesDone);
         emit uploadStateChanged();
 
         QTimer::singleShot(0, this, [this]() { uploadNext(); });
@@ -892,7 +891,6 @@ void PanoramaxClient::pollUploadSet()
         status.insert(QStringLiteral("collections"), collections);
 
         m_lastProcessing = status;
-        emit processingUpdated(status);
 
         if (status.value(QStringLiteral("ready")).toBool()) {
             m_pollTimer->stop();
@@ -921,35 +919,37 @@ void PanoramaxClient::fetchUploadSetFiles()
 
         QVariantList rejections;
         const QByteArray body = readReplyBody(reply);
-        if (reply->error() == QNetworkReply::NoError) {
-            const QJsonDocument document = QJsonDocument::fromJson(body);
+        if (reply->error() != QNetworkReply::NoError) {
+            failUpload(replyErrorMessage(reply, body));
+            return;
+        }
 
-            QJsonArray files;
-            if (document.isArray()) {
-                files = document.array();
-            } else if (document.isObject()) {
-                // The API wraps the list in an object: { "files": [ ... ], "links": [ ... ] }
-                files = document.object().value(QStringLiteral("files")).toArray();
+        const QJsonDocument document = QJsonDocument::fromJson(body);
+
+        QJsonArray files;
+        if (document.isArray()) {
+            files = document.array();
+        } else if (document.isObject()) {
+            // The API wraps the list in an object: { "files": [ ... ], "links": [ ... ] }
+            files = document.object().value(QStringLiteral("files")).toArray();
+        }
+
+        for (const QJsonValue &value : files) {
+            const QJsonObject file = value.toObject();
+            const QJsonObject rejected = file.value(QStringLiteral("rejected")).toObject();
+            if (rejected.isEmpty()) {
+                continue;
             }
 
-            for (const QJsonValue &value : files) {
-                const QJsonObject file = value.toObject();
-                const QJsonObject rejected = file.value(QStringLiteral("rejected")).toObject();
-                if (rejected.isEmpty()) {
-                    continue;
-                }
-
-                QVariantMap entry;
-                entry.insert(QStringLiteral("name"),
-                             file.value(QStringLiteral("file_name")).toString());
-                entry.insert(QStringLiteral("reason"),
-                             rejected.value(QStringLiteral("reason")).toString());
-                entry.insert(QStringLiteral("message"),
-                             rejected.value(QStringLiteral("message")).toString());
-                entry.insert(QStringLiteral("severity"),
-                             rejected.value(QStringLiteral("severity")).toString());
-                rejections.append(entry);
-            }
+            QVariantMap entry;
+            entry.insert(QStringLiteral("name"), file.value(QStringLiteral("file_name")).toString());
+            entry.insert(QStringLiteral("reason"),
+                         rejected.value(QStringLiteral("reason")).toString());
+            entry.insert(QStringLiteral("message"),
+                         rejected.value(QStringLiteral("message")).toString());
+            entry.insert(QStringLiteral("severity"),
+                         rejected.value(QStringLiteral("severity")).toString());
+            rejections.append(entry);
         }
 
         QVariantMap summary = m_lastProcessing;
@@ -958,8 +958,7 @@ void PanoramaxClient::fetchUploadSetFiles()
         summary.insert(QStringLiteral("failed"), m_failedPaths.size());
 
         const bool ready = summary.value(QStringLiteral("ready")).toBool();
-        m_progress = 100;
-        emit progressChanged();
+        updateProgress(m_filesTotal);
         m_pollTimer->stop();
         setBusy(false);
         setStatus(ready ? tr("Upload finished")
@@ -973,23 +972,28 @@ void PanoramaxClient::failUpload(const QString &message)
 {
     m_pollTimer->stop();
     m_polling = false;
+    m_uploadAttempt = 0;
     setBusy(false);
     setStatus(message);
+    emit progressChanged();
+    emit uploadStateChanged();
     emit uploadFailed(message);
 }
 
 QUrl PanoramaxClient::apiUrl(const QString &path) const
 {
-    QString base = m_instanceUrl;
-    while (base.endsWith(QLatin1Char('/'))) {
-        base.chop(1);
-    }
-    return QUrl(base + QStringLiteral("/api") + path);
+    return QUrl(normalizeInstanceUrl(m_instanceUrl) + QStringLiteral("/api") + path);
 }
 
 QNetworkRequest PanoramaxClient::apiRequest(const QString &path, bool withAuth) const
 {
-    QNetworkRequest request(apiUrl(path));
+    return apiRequestFor(apiUrl(path), withAuth);
+}
+
+QNetworkRequest PanoramaxClient::apiRequestFor(const QUrl &url, bool withAuth) const
+{
+    QNetworkRequest request(url);
+    request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
     request.setHeader(QNetworkRequest::UserAgentHeader,
                       QStringLiteral("harbour-periscope/%1 (SailfishOS)")
                           .arg(QCoreApplication::applicationVersion()));
@@ -1006,6 +1010,7 @@ void PanoramaxClient::setTimeout(QNetworkReply *reply, int milliseconds)
     timer->setSingleShot(true);
     connect(timer, &QTimer::timeout, reply, [reply]() {
         if (reply->isRunning()) {
+            reply->setProperty("timedOut", true);
             reply->abort();
         }
     });
@@ -1016,6 +1021,10 @@ void PanoramaxClient::setTimeout(QNetworkReply *reply, int milliseconds)
 
 QString PanoramaxClient::replyErrorMessage(QNetworkReply *reply, const QByteArray &body) const
 {
+    if (reply->property("timedOut").toBool()) {
+        return tr("Connection timed out");
+    }
+
     const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
     if (httpStatus == 401) {
@@ -1056,12 +1065,6 @@ QString PanoramaxClient::replyErrorMessage(QNetworkReply *reply, const QByteArra
     return reply->errorString();
 }
 
-QString PanoramaxClient::defaultTitle() const
-{
-    return tr("Sequence %1")
-        .arg(QLocale().toString(QDateTime::currentDateTime(), QLocale::ShortFormat));
-}
-
 void PanoramaxClient::setBusy(bool busy)
 {
     if (m_busy == busy) {
@@ -1080,7 +1083,17 @@ void PanoramaxClient::setStatus(const QString &status)
     emit statusTextChanged();
 }
 
-void PanoramaxClient::clearSession(bool emitSignals)
+void PanoramaxClient::updateProgress(int done)
+{
+    const int percent = qMin(100, static_cast<int>(100.0 * done / qMax(1, m_filesTotal)));
+    if (percent == m_progress) {
+        return;
+    }
+    m_progress = percent;
+    emit progressChanged();
+}
+
+void PanoramaxClient::clearSession()
 {
     // A pending /users/me reply would otherwise sign the user back in.
     cancelAuthCheck();
@@ -1095,9 +1108,7 @@ void PanoramaxClient::clearSession(bool emitSignals)
     m_settings->remove(QStringLiteral("userName"));
     m_settings->sync();
 
-    if (emitSignals) {
-        emit authChanged();
-    }
+    emit authChanged();
 }
 
 void PanoramaxClient::cancelUpload()
@@ -1121,6 +1132,7 @@ void PanoramaxClient::cancelUpload()
     m_progress = 0;
     m_lastProcessing.clear();
     m_pollElapsed = 0;
+    m_uploadAttempt = 0;
 
     setBusy(false);
 

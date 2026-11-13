@@ -1,7 +1,6 @@
 Name:       harbour-periscope
 
 # >> macros
-%define __provides_exclude_from ^%{_datadir}/.*$
 # << macros
 
 %{!?qtc_qmake:%define qtc_qmake %qmake}
@@ -9,17 +8,23 @@ Name:       harbour-periscope
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    Upload pictures to Panoramax
-Version:    0.1.0
+Version:    0.2.0
 Release:    1
 Group:      Qt/Qt
 License:    MIT
 URL:        https://scarpino.dev
 Source0:    %{name}-%{version}.tar.bz2
-Requires:   sailfishsilica-qt5 >= 0.10.9
-#Requires:   sailfish-components-pickers-qt5 >= 0.1.7
+Requires:   sailfishsilica-qt5
 Requires:   sailfishsecretsdaemon-secretsplugins-default
+Requires:   qt5-qtmultimedia
+Requires:   qt5-qtdeclarative-import-multimedia
+Requires:   qt5-qtdeclarative-import-sensors
+Requires:   qt5-qtdeclarative-import-positioning
+Requires:   libkeepalive
 BuildRequires:  pkgconfig(sailfishapp) >= 1.0.2
 BuildRequires:  pkgconfig(Qt5Core)
+BuildRequires:  pkgconfig(Qt5Gui)
+BuildRequires:  pkgconfig(Qt5Multimedia)
 BuildRequires:  pkgconfig(Qt5Network)
 BuildRequires:  pkgconfig(Qt5Qml)
 BuildRequires:  pkgconfig(Qt5Quick)
@@ -57,7 +62,7 @@ Links:
 # >> build pre
 # << build pre
 
-%qtc_qmake5
+%qtc_qmake5 APP_VERSION=%{version}
 
 %qtc_make %{?_smp_mflags}
 

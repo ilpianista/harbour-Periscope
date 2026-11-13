@@ -4,8 +4,6 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QHash>
-#include <QImageReader>
-#include <QSize>
 
 #include <cmath>
 #include <limits>
@@ -14,8 +12,8 @@ namespace {
 
 // Most JPEGs carry their EXIF block in the first few kilobytes; read a small
 // chunk first and only grow it when the EXIF segment is not found yet.
-const int kInitialHeaderSize = 64 * 1024;
-const int kMaxHeaderSize = 512 * 1024;
+constexpr int kInitialHeaderSize = 64 * 1024;
+constexpr int kMaxHeaderSize = 512 * 1024;
 
 quint16 readU16(const QByteArray &data, qint64 offset, bool littleEndian)
 {
@@ -117,7 +115,7 @@ bool readIfd(const QByteArray &tiff,
             continue;
         }
 
-        entry.value = tiff.mid(int(valueOffset), int(size));
+        entry.value = tiff.mid(static_cast<int>(valueOffset), static_cast<int>(size));
         entries.insert(entry.tag, entry);
         found = true;
     }
@@ -178,19 +176,19 @@ bool findExifApp1(const QByteArray &data, QByteArray &tiff)
 
     qint64 pos = 2;
     while (pos + 2 <= data.size()) {
-        if (uchar(data.at(int(pos))) != 0xFF) {
+        if (uchar(data.at(static_cast<int>(pos))) != 0xFF) {
             return false;
         }
 
         // A marker may be preceded by any number of 0xFF fill bytes.
-        while (pos + 1 < data.size() && uchar(data.at(int(pos + 1))) == 0xFF) {
+        while (pos + 1 < data.size() && uchar(data.at(static_cast<int>(pos + 1))) == 0xFF) {
             ++pos;
         }
         if (pos + 4 > data.size()) {
             return false;
         }
 
-        const quint8 marker = uchar(data.at(int(pos + 1)));
+        const quint8 marker = uchar(data.at(static_cast<int>(pos + 1)));
         if (marker == 0x01 || (marker >= 0xD0 && marker <= 0xD7)) {
             pos += 2;
             continue;
@@ -208,8 +206,10 @@ bool findExifApp1(const QByteArray &data, QByteArray &tiff)
             const qint64 payloadOffset = pos + 4;
             const qint64 payloadSize = qint64(length) - 2;
             static const char exifHeader[] = {'E', 'x', 'i', 'f', 0, 0};
-            if (payloadSize > 6 && data.mid(int(payloadOffset), 6) == QByteArray(exifHeader, 6)) {
-                tiff = data.mid(int(payloadOffset + 6), int(payloadSize - 6));
+            if (payloadSize > 6
+                && data.mid(static_cast<int>(payloadOffset), 6) == QByteArray(exifHeader, 6)) {
+                tiff = data.mid(static_cast<int>(payloadOffset + 6),
+                                static_cast<int>(payloadSize - 6));
                 return true;
             }
         }
@@ -263,19 +263,7 @@ QVariantMap PhotoMetadata::read(const QString &path) const
         hasExif = findExifApp1(header, tiff);
     }
 
-    // Reuse the already open device instead of reopening the file.
-    QSize imageSize;
-    {
-        file.seek(0);
-        QImageReader reader(&file);
-        imageSize = reader.size();
-    }
     file.close();
-
-    if (imageSize.isValid()) {
-        result.insert(QStringLiteral("width"), imageSize.width());
-        result.insert(QStringLiteral("height"), imageSize.height());
-    }
 
     if (!hasExif) {
         return result;

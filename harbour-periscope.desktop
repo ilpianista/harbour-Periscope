@@ -11,6 +11,6 @@ Comment=Upload pictures to Panoramax
 BackupPathList=.config/dev.scarpino/harbour-periscope/
 
 [X-Sailjail]
-Permissions=Internet;Secrets;MediaIndexing;Pictures
+Permissions=Internet;Secrets;MediaIndexing;Pictures;Camera;Location
 OrganizationName=dev.scarpino
 ApplicationName=harbour-periscope
