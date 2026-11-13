@@ -328,6 +328,15 @@ Page {
                     text: qsTr("Pictures need both a GPS position and a capture date to be uploaded.")
                 }
 
+                ProgressBar {
+                    visible: client.busy
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width - 2 * Theme.horizontalPageMargin
+                    value: client.progress / 100.0
+                    label: client.statusText
+                    valueText: client.filesTotal > 0 ? qsTr("%1/%2").arg(client.filesDone).arg(client.filesTotal) : ""
+                }
+
                 Repeater {
                     model: page.photos
 
@@ -375,20 +384,6 @@ Page {
                     description: qsTr("Useful for a walk, a ride or a drive covering many pictures")
                     enabled: !client.busy
                     onCheckedChanged: page.singleSequence = checked
-                }
-
-                Column {
-                    visible: client.busy
-                    width: parent.width
-                    spacing: Theme.paddingMedium
-
-                    ProgressBar {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        width: parent.width - 2 * Theme.horizontalPageMargin
-                        value: client.progress / 100.0
-                        label: client.statusText
-                        valueText: client.filesTotal > 0 ? qsTr("%1/%2").arg(client.filesDone).arg(client.filesTotal) : ""
-                    }
                 }
 
                 ErrorLabel {
